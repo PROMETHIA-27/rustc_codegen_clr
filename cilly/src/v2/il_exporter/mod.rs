@@ -1317,28 +1317,6 @@ fn assemble_file(exe_out: &Path, il_path: &Path, is_lib: bool) {
         stdout,
         String::from_utf8_lossy(&out.stderr)
     );
-    let asm_type = if is_lib { "-dll" } else { "-exe" };
-    let mut cmd = std::process::Command::new(ILASM_PATH.clone());
-    cmd.arg(il_path)
-    .arg(format!("-output:{exe_out}", exe_out = exe_out.to_string_lossy()))
-    .arg("-debug")
-    .arg("-OPTIMIZE")
-    .arg(asm_type)
-    // .arg("-FOLD") saves up on space, consider enabling.
-    ;
-    if *ILASM_FLAVOUR == IlasmFlavour::Clasic {
-        // Limit the memory usage of mono
-        cmd.env("MONO_GC_PARAMS", "soft-heap-limit=500m");
-    }
-    let out = cmd.output().unwrap();
-    let stdout = String::from_utf8_lossy(&out.stdout);
-    let stderr = String::from_utf8_lossy(&out.stderr);
-    assert!(
-        !(stderr.contains("\nError\n") || stderr.contains("FAILURE") || stdout.contains("FAILURE")),
-        "stdout:{} stderr:{} cmd:{cmd:?}",
-        stdout,
-        String::from_utf8_lossy(&out.stderr)
-    );
 }
 impl Exporter for ILExporter {
     type Error = std::io::Error;
